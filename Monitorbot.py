@@ -10,8 +10,8 @@ import requests
 TELEGRAM_BOT_TOKEN = "7714425793:AAEmGC7o7ULDIbEyfyzjKAhrgGIN530tiwI"
 GROUP_CHAT_ID = "-1002200859431"  # Your Telegram group where logs will be sent
 BOTS_TO_MONITOR = {
-    "Bot1": {"token": "8195465392:AAEMEnNNEwdJZ5x4cDwdhytyNVAf_cWwNss", "restart_cmd": "screen -X -S bot1 quit; cd /home/user/bots/bot1 && screen -dmS bot1 python3 -m AnonXMusic"},
-    "Bot2": {"token": "7799980150:AAFUzttHyEXxYfXDOWLnpT6FGC_ePCspSlw", "restart_cmd": "screen -X -S bot2 quit; cd /home/user/bots/bot2 && screen -dmS bot2 python3 -m AnonXMusic"},
+    "Bot1": {"token": "8195465392:AAEMEnNNEwdJZ5x4cDwdhytyNVAf_cWwNss", "restart_cmd": "screen -X -S musicxdrag quit; cd /home/user/bots/bot1 && screen -dmS bot1 python3 -m AnonXMusic"},
+    "Bot2": {"token": "7799980150:AAFUzttHyEXxYfXDOWLnpT6FGC_ePCspSlw", "restart_cmd": "screen -X -S test quit; cd /home/user/bots/bot2 && screen -dmS bot2 python3 -m AnonXMusic"},
     # Add more bots here
 }
 CHECK_INTERVAL = 60  # Check every 60 seconds
