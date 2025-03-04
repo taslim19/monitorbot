@@ -2,6 +2,7 @@ import os
 import time
 import logging
 import requests
+import asyncio
 from telegram import Bot, Update
 from telegram.ext import Application, CommandHandler, CallbackContext
 
@@ -12,7 +13,7 @@ OWNER_ID = 7361622601  # Replace with the actual Telegram user ID of the bot own
 BOTS_TO_MONITOR = {
     "Bot1": {"token": "7781287725:AAEGW1u0kt6e9rLBQUBMGlU9L2GN3CxG9jI"},
     "Bot2": {"token": "8195465392:AAFU0ViPHc0LEaSPVHFWme5v7cxlUn9kIRo"},
-    "bot3": {"token": "7801213482:AAEoQ98jWCDxpUlAj0xGfKqFwdmnE7h0UD4"},
+    "Bot3": {"token": "7801213482:AAEoQ98jWCDxpUlAj0xGfKqFwdmnE7h0UD4"},
 }
 CHECK_INTERVAL = 3600  # Check every 1 hour (3600 seconds)
 
@@ -54,7 +55,6 @@ async def main():
     app.add_handler(CommandHandler("uptime", uptime_command))
     
     # Start monitoring bots in the background
-    import asyncio
     asyncio.create_task(monitor_bots())
 
     print("Bot is running...")
@@ -62,5 +62,11 @@ async def main():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    import asyncio
-    loop.run_until_complete(main())  # ✅ Works without conflict
+
+    try:
+        loop = asyncio.get_running_loop()  # ✅ Check if event loop is already running
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(main())  # ✅ Corrected
