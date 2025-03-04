@@ -3,7 +3,7 @@ import time
 import logging
 import requests
 from telegram import Bot, Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import Application, CommandHandler, CallbackContext
 
 # Configuration
 TELEGRAM_BOT_TOKEN = "7714425793:AAEmGC7o7ULDIbEyfyzjKAhrgGIN530tiwI"
@@ -24,38 +24,43 @@ def check_bot_status(bot_token):
     except requests.exceptions.RequestException:
         return False
 
-def send_notification(bot, message):
-    bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode="HTML")
+async def send_notification(bot, message):
+    await bot.send_message(chat_id=GROUP_CHAT_ID, text=message, parse_mode="HTML")
 
-def monitor_bots():
+async def monitor_bots():
     bot = Bot(token=TELEGRAM_BOT_TOKEN)
     while True:
         status_message = "<b>📊 Bot Status Update:</b>\n"
         for bot_name, bot_data in BOTS_TO_MONITOR.items():
             is_online = check_bot_status(bot_data["token"])
             status_message += f"<b>🔹 {bot_name}:</b> {'<b>✅ Online</b>' if is_online else '<b>❌ Offline</b>'}\n"
-        send_notification(bot, status_message)
-        time.sleep(CHECK_INTERVAL)
+        await send_notification(bot, status_message)
+        await asyncio.sleep(CHECK_INTERVAL)  # Use asyncio.sleep in async functions
 
-def uptime_command(update: Update, context: CallbackContext):
+async def uptime_command(update: Update, context: CallbackContext):
     if update.message.from_user.id != OWNER_ID:
-        update.message.reply_text("⚠️ You are not authorized to use this command.")
+        await update.message.reply_text("⚠️ You are not authorized to use this command.")
         return
     
     status_message = "<b>📊 Bot Status:</b>\n"
     for bot_name, bot_data in BOTS_TO_MONITOR.items():
         is_online = check_bot_status(bot_data["token"])
         status_message += f"<b>🔹 {bot_name}:</b> {'<b>✅ Online</b>' if is_online else '<b>❌ Offline</b>'}\n"
-    update.message.reply_text(status_message, parse_mode="HTML")
+    await update.message.reply_text(status_message, parse_mode="HTML")
 
-def main():
-    updater = Updater(token=TELEGRAM_BOT_TOKEN, use_context=True)
-    dp = updater.dispatcher
-    dp.add_handler(CommandHandler("uptime", uptime_command))
-    updater.start_polling()
-    monitor_bots()
-    updater.idle()
+async def main():
+    app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    
+    app.add_handler(CommandHandler("uptime", uptime_command))
+    
+    # Start monitoring bots in the background
+    import asyncio
+    asyncio.create_task(monitor_bots())
+
+    print("Bot is running...")
+    await app.run_polling()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    main()
+    import asyncio
+    asyncio.run(main())
