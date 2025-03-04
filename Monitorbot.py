@@ -1,5 +1,4 @@
 import os
-import time
 import logging
 import requests
 import asyncio
@@ -13,7 +12,7 @@ OWNER_ID = 7361622601  # Replace with the actual Telegram user ID of the bot own
 BOTS_TO_MONITOR = {
     "Bot1": {"token": "7781287725:AAEGW1u0kt6e9rLBQUBMGlU9L2GN3CxG9jI"},
     "Bot2": {"token": "8195465392:AAFU0ViPHc0LEaSPVHFWme5v7cxlUn9kIRo"},
-    "Bot3": {"token": "7801213482:AAEoQ98jWCDxpUlAj0xGfKqFwdmnE7h0UD4"},
+    "bot3": {"token": "7801213482:AAEoQ98jWCDxpUlAj0xGfKqFwdmnE7h0UD4"},
 }
 CHECK_INTERVAL = 3600  # Check every 1 hour (3600 seconds)
 
@@ -36,7 +35,7 @@ async def monitor_bots():
             is_online = check_bot_status(bot_data["token"])
             status_message += f"<b>🔹 {bot_name}:</b> {'<b>✅ Online</b>' if is_online else '<b>❌ Offline</b>'}\n"
         await send_notification(bot, status_message)
-        await asyncio.sleep(CHECK_INTERVAL)  # Use asyncio.sleep in async functions
+        await asyncio.sleep(CHECK_INTERVAL)
 
 async def uptime_command(update: Update, context: CallbackContext):
     if update.message.from_user.id != OWNER_ID:
@@ -51,7 +50,6 @@ async def uptime_command(update: Update, context: CallbackContext):
 
 async def main():
     app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
-    
     app.add_handler(CommandHandler("uptime", uptime_command))
     
     # Start monitoring bots in the background
@@ -64,9 +62,10 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     try:
-        loop = asyncio.get_running_loop()  # ✅ Check if event loop is already running
+        loop = asyncio.get_running_loop()
+        print("Using existing event loop.")
+        task = loop.create_task(main())  # Use create_task if loop is running
+        loop.run_until_complete(task)
     except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-    loop.run_until_complete(main())  # ✅ Corrected
+        print("Starting a new event loop.")
+        asyncio.run(main())  # Use asyncio.run() if no loop exists
